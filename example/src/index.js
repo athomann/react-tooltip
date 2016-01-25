@@ -46,7 +46,7 @@ const Test = React.createClass({
         <section className='tooltip-example'>
           <h4 className='title'>React Tooltip</h4>
           <div className='demonstration'>
-            <a data-for='main' data-tip="Hello<br />multiline<br />tooltip">
+            <a data-for='mains' data-tip="Hello<br />multiline<br />tooltip">
                ◕‿‿◕
             </a>
           </div>
@@ -83,21 +83,21 @@ const Test = React.createClass({
               </div>
             </pre>
           </div>
-          <ReactTooltip id='main' place={place} type={type} effect={effect} multiline={true}/>
+          <ReactTooltip id='mains' place={place} type={type} effect={effect} multiline={true}/>
         </section>
         <section className="advance">
           <div className="section">
             <h4 className='title'>Advance features</h4>
             <p className="sub-title">Use everything as tooltip</p>
-          
+
             <div className="example-jsx">
               <div className="side">
                 <a data-tip data-for='happyFace'> d(`･∀･)b </a>
                 <ReactTooltip id='happyFace' type="error"><span>Show happy face</span></ReactTooltip>
               </div>
               <div className="side">
-                <a data-tip data-for='sadFace'> இдஇ </a>
-                <ReactTooltip id='sadFace' type="warning" effect="solid"><span>Show sad face</span></ReactTooltip>
+                <a data-tip data-for='sadFace' data-delay-hide="5000"> இдஇ </a>
+                <ReactTooltip id='sadFace' type="warning" delayHide={5000} effect="solid"><span><a href="http://google.com">Show sad face</a></span></ReactTooltip>
               </div>
             </div>
             <br />
@@ -113,7 +113,7 @@ const Test = React.createClass({
                 "</ReactTooltip>"}</p>
               </div>
             </pre>
-          
+
             <div className="example-jsx">
               <div className="side"><a data-tip data-for='global'> σ`∀´)σ </a></div>
               <div className="side"><a data-tip data-for='global'> (〃∀〃) </a></div>
@@ -149,7 +149,7 @@ const Test = React.createClass({
           <div className="section">
             <h4 className='title'>Customer event</h4>
             <p className="sub-title"></p>
-          
+
             <div className="example-jsx">
               <div className="side">
                 <a data-for='customer-event' data-tip='customer event' data-event='click' data-type='info'>( •̀д•́)</a>

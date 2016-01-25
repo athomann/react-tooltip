@@ -54,7 +54,6 @@
   opacity: 0;
   padding: 8px 21px;
   position: fixed;
-  pointer-events: none;
   transition: opacity 0.3s ease-out , margin-top 0.3s ease-out, margin-left 0.3s ease-out;
   top: -999em;
   visibility: hidden;
@@ -188,4 +187,4 @@
     padding: 2px 0px;
     text-align: center;
   }
-} 
+}

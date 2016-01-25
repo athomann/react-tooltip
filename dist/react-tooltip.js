@@ -105,9 +105,12 @@ var ReactTooltip = (function (_Component) {
       html: false,
       delayHide: 0,
       delayShow: 0,
+      isActive: false,
+      popover: false,
       event: props.event || null
     };
     this.delayShowLoop = null;
+    this.setPopover = this.setPopover.bind(this);
   }
 
   /* Bind this with method */
@@ -161,12 +164,12 @@ var ReactTooltip = (function (_Component) {
 
   ReactTooltip.prototype.bindListener = function bindListener() {
     var targetArray = this.getTargetArray();
-
     var dataEvent = undefined;
     for (var i = 0; i < targetArray.length; i++) {
       if (targetArray[i].getAttribute('currentItem') === null) {
         targetArray[i].setAttribute('currentItem', 'false');
       }
+
       dataEvent = this.state.event || targetArray[i].getAttribute('data-event');
       if (dataEvent) {
         targetArray[i].removeEventListener(dataEvent, this.checkStatus);
@@ -247,6 +250,14 @@ var ReactTooltip = (function (_Component) {
     }
   };
 
+  ReactTooltip.prototype.setPopover = function setPopover(isActive) {
+    this.setState({
+      isActive: isActive
+    });
+    clearTimeout(this.hide);
+    !isActive ? this.hideTooltip() : '';
+  };
+
   /**
    * Used in customer event
    */
@@ -287,7 +298,7 @@ var ReactTooltip = (function (_Component) {
    */
 
   ReactTooltip.prototype.showTooltip = function showTooltip(e) {
-    var originTooltip = e.currentTarget.getAttribute('data-tip');
+    var originTooltip = e.currentTarget.getAttribute('data-tip') || e.currentTarget.getAttribute('id');
     /* Detect multiline */
     var regexp = /<br\s*\/?>/;
     var multiline = e.currentTarget.getAttribute('data-multiline') ? e.currentTarget.getAttribute('data-multiline') : this.props.multiline ? this.props.multiline : false;
@@ -316,6 +327,7 @@ var ReactTooltip = (function (_Component) {
       effect: e.currentTarget.getAttribute('data-effect') ? e.currentTarget.getAttribute('data-effect') : this.props.effect ? this.props.effect : 'float',
       offset: e.currentTarget.getAttribute('data-offset') ? e.currentTarget.getAttribute('data-offset') : this.props.offset ? this.props.offset : {},
       html: e.currentTarget.getAttribute('data-html') ? e.currentTarget.getAttribute('data-html') : this.props.html ? this.props.html : false,
+      popover: e.currentTarget.getAttribute('data-popover') ? e.currentTarget.getAttribute('data-popover') : this.props.popover ? this.props.popover : false,
       delayShow: e.currentTarget.getAttribute('data-delay-show') ? e.currentTarget.getAttribute('data-delay-show') : this.props.delayShow ? this.props.delayShow : 0,
       delayHide: e.currentTarget.getAttribute('data-delay-hide') ? e.currentTarget.getAttribute('data-delay-hide') : this.props.delayHide ? this.props.delayHide : 0,
       border: e.currentTarget.getAttribute('data-border') ? e.currentTarget.getAttribute('data-border') === 'true' : this.props.border ? this.props.border : false,
@@ -325,6 +337,46 @@ var ReactTooltip = (function (_Component) {
 
     this.addScrollListener();
     this.updateTooltip(e);
+  };
+
+  ReactTooltip.prototype.keepTooltip = function keepTooltip(e) {
+    var originTooltip = e.currentTarget.getAttribute('data-tip') || e.currentTarget.getAttribute('id');
+    /* Detect multiline */
+    var regexp = /<br\s*\/?>/;
+    var multiline = e.currentTarget.getAttribute('data-multiline') ? e.currentTarget.getAttribute('data-multiline') : this.props.multiline ? this.props.multiline : false;
+    var tooltipText = undefined;
+    var multilineCount = 0;
+    if (!multiline || multiline === 'false' || !regexp.test(originTooltip)) {
+      tooltipText = originTooltip;
+    } else {
+      tooltipText = originTooltip.split(regexp).map(function (d, i) {
+        multilineCount += 1;
+        return _react2['default'].createElement(
+          'span',
+          { key: i, className: 'multi-line' },
+          d
+        );
+      });
+    }
+    /* Define extra class */
+    var extraClass = e.currentTarget.getAttribute('data-class') ? e.currentTarget.getAttribute('data-class') : '';
+    extraClass = this.props['class'] ? this.props['class'] + ' ' + extraClass : extraClass;
+    this.setState({
+      placeholder: tooltipText,
+      multilineCount: multilineCount,
+      place: e.currentTarget.getAttribute('data-place') ? e.currentTarget.getAttribute('data-place') : this.props.place ? this.props.place : 'top',
+      type: e.currentTarget.getAttribute('data-type') ? e.currentTarget.getAttribute('data-type') : this.props.type ? this.props.type : 'dark',
+      effect: e.currentTarget.getAttribute('data-effect') ? e.currentTarget.getAttribute('data-effect') : this.props.effect ? this.props.effect : 'float',
+      html: e.currentTarget.getAttribute('data-html') ? e.currentTarget.getAttribute('data-html') : this.props.html ? this.props.html : false,
+      delayShow: e.currentTarget.getAttribute('data-delay-show') ? e.currentTarget.getAttribute('data-delay-show') : this.props.delayShow ? this.props.delayShow : 0,
+      delayHide: e.currentTarget.getAttribute('data-delay-hide') ? e.currentTarget.getAttribute('data-delay-hide') : this.props.delayHide ? this.props.delayHide : 0,
+      border: e.currentTarget.getAttribute('data-border') ? e.currentTarget.getAttribute('data-border') === 'true' : this.props.border ? this.props.border : false,
+      extraClass: extraClass,
+      multiline: multiline
+    });
+
+    this.addScrollListener();
+    // this.updateTooltip(e);
   };
 
   /**
@@ -373,15 +425,17 @@ var ReactTooltip = (function (_Component) {
   ReactTooltip.prototype.hideTooltip = function hideTooltip() {
     var _this3 = this;
 
-    var delayHide = this.state.delayHide;
+    var _state2 = this.state;
+    var delayHide = _state2.delayHide;
+    var isActive = _state2.isActive;
 
     clearTimeout(this.delayShowLoop);
-    setTimeout(function () {
+    this.hide = setTimeout(function () {
       _this3.setState({
         show: false
       });
       _this3.removeScrollListener();
-    }, parseInt(delayHide, 10));
+    }, parseInt(delayHide));
   };
 
   /**
@@ -440,10 +494,10 @@ var ReactTooltip = (function (_Component) {
 
     var tipWidth = node.clientWidth;
     var tipHeight = node.clientHeight;
-    var _state2 = this.state;
-    var effect = _state2.effect;
-    var place = _state2.place;
-    var offset = _state2.offset;
+    var _state3 = this.state;
+    var effect = _state3.effect;
+    var place = _state3.place;
+    var offset = _state3.offset;
 
     var offsetFromEffect = {};
 
@@ -483,6 +537,7 @@ var ReactTooltip = (function (_Component) {
     if (Object.prototype.toString.apply(offset) === '[object String]') {
       offset = JSON.parse(offset.toString().replace(/\'/g, '\"'));
     }
+
     for (var key in offset) {
       if (key === 'top') {
         yPosition -= parseInt(offset[key], 10);
@@ -505,6 +560,7 @@ var ReactTooltip = (function (_Component) {
       var offsetEffectX = effect === 'solid' ? 0 : place ? offsetFromEffect[place].x : 0;
       return x + offsetEffectX + xPosition;
     };
+
     var getStyleTop = function getStyleTop(place) {
       var offsetEffectY = effect === 'solid' ? 0 : place ? offsetFromEffect[place].y : 0;
       return y + offsetEffectY + yPosition;
@@ -514,14 +570,17 @@ var ReactTooltip = (function (_Component) {
       var styleLeft = getStyleLeft(place);
       return styleLeft < 0 && x + offsetFromEffect['right'].x + xPosition <= windoWidth;
     };
+
     var outsideRight = function outsideRight(place) {
       var styleLeft = getStyleLeft(place);
       return styleLeft + tipWidth > windoWidth && x + offsetFromEffect['left'].x + xPosition >= 0;
     };
+
     var outsideTop = function outsideTop(place) {
       var styleTop = getStyleTop(place);
       return styleTop < 0 && y + offsetFromEffect['bottom'].y + yPosition + tipHeight < windowHeight;
     };
+
     var outsideBottom = function outsideBottom(place) {
       var styleTop = getStyleTop(place);
       return styleTop + tipHeight >= windowHeight && y + offsetFromEffect['top'].y + yPosition >= 0;
@@ -582,22 +641,31 @@ var ReactTooltip = (function (_Component) {
   };
 
   ReactTooltip.prototype.render = function render() {
-    var _state3 = this.state;
-    var placeholder = _state3.placeholder;
-    var extraClass = _state3.extraClass;
-    var html = _state3.html;
+    var _this4 = this;
 
-    var tooltipClass = _classnames2['default']('__react_component_tooltip', { 'show': this.state.show }, { 'border': this.state.border }, { 'place-top': this.state.place === 'top' }, { 'place-bottom': this.state.place === 'bottom' }, { 'place-left': this.state.place === 'left' }, { 'place-right': this.state.place === 'right' }, { 'type-dark': this.state.type === 'dark' }, { 'type-success': this.state.type === 'success' }, { 'type-warning': this.state.type === 'warning' }, { 'type-error': this.state.type === 'error' }, { 'type-info': this.state.type === 'info' }, { 'type-light': this.state.type === 'light' });
+    var _state4 = this.state;
+    var placeholder = _state4.placeholder;
+    var extraClass = _state4.extraClass;
+    var html = _state4.html;
+
+    var tooltipClass = _classnames2['default']('__react_component_tooltip', { 'show': this.state.show }, { 'border': this.state.border }, { 'place-top': this.state.place === 'top' }, { 'place-bottom': this.state.place === 'bottom' }, { 'place-left': this.state.place === 'left' }, { 'place-right': this.state.place === 'right' }, { 'type-dark': this.state.type === 'dark' }, { 'type-success': this.state.type === 'success' }, { 'type-warning': this.state.type === 'warning' }, { 'type-error': this.state.type === 'error' }, { 'type-info': this.state.type === 'info' }, { 'type-light': this.state.type === 'light ' });
 
     if (html) {
-      return _react2['default'].createElement('div', { className: tooltipClass + ' ' + extraClass, 'data-id': 'tooltip', dangerouslySetInnerHTML: { __html: placeholder } });
+      return _react2['default'].createElement('div', { id: this.props.id, className: tooltipClass + ' ' + extraClass, 'data-id': 'tooltip', dangerouslySetInnerHTML: { __html: placeholder } });
     } else {
       var content = this.props.children ? this.props.children : placeholder;
-      return _react2['default'].createElement(
-        'div',
-        { className: tooltipClass + ' ' + extraClass, 'data-id': 'tooltip' },
-        content
-      );
+      return _react2['default'].createElement('div', {
+        children: content,
+        className: tooltipClass + ' ' + extraClass,
+        'data-id': 'tooltip',
+        id: this.props.id,
+        onMouseLeave: function () {
+          return _this4.setPopover(false);
+        },
+        onMouseOver: function () {
+          return _this4.setPopover(true);
+        }
+      });
     }
   };
 
