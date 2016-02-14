@@ -575,9 +575,7 @@ export default class ReactTooltip extends Component {
       { 'type-light': this.state.type === 'light' }
     );
 
-    if (!this.state.show) {
-      return null;
-    } else if (html) {
+    if (html) {
       return (
         <div
           id={this.props.id}
@@ -590,7 +588,7 @@ export default class ReactTooltip extends Component {
       const content = this.props.children ? this.props.children : placeholder;
       return (
         <div
-          children={content}
+          children={this.state.show ? content : null}
           className={tooltipClass + ' ' + extraClass}
           data-id='tooltip'
           id={this.props.id}

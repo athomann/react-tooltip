@@ -650,9 +650,7 @@ var ReactTooltip = (function (_Component) {
 
     var tooltipClass = _classnames2['default']('__react_component_tooltip', { show: this.state.show }, { border: this.state.border }, { 'place-top': this.state.place === 'top' }, { 'place-bottom': this.state.place === 'bottom' }, { 'place-left': this.state.place === 'left' }, { 'place-right': this.state.place === 'right' }, { 'type-dark': this.state.type === 'dark' }, { 'type-success': this.state.type === 'success' }, { 'type-warning': this.state.type === 'warning' }, { 'type-error': this.state.type === 'error' }, { 'type-info': this.state.type === 'info' }, { 'type-light': this.state.type === 'light' });
 
-    if (!this.state.show) {
-      return null;
-    } else if (html) {
+    if (html) {
       return _react2['default'].createElement('div', {
         id: this.props.id,
         className: tooltipClass + ' ' + extraClass,
@@ -662,7 +660,7 @@ var ReactTooltip = (function (_Component) {
     } else {
       var content = this.props.children ? this.props.children : placeholder;
       return _react2['default'].createElement('div', {
-        children: content,
+        children: this.state.show ? content : null,
         className: tooltipClass + ' ' + extraClass,
         'data-id': 'tooltip',
         id: this.props.id,
