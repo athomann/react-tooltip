@@ -5,7 +5,7 @@ import cssStyle from './style';
 
 export default class ReactTooltip extends Component {
 
-  static displayName = 'ReactTooltip'
+  static displayName = 'ReactTooltip';
 
   /**
    * Class method
@@ -561,8 +561,8 @@ export default class ReactTooltip extends Component {
     const { placeholder, extraClass, html } = this.state;
     let tooltipClass = classname(
       '__react_component_tooltip',
-      { 'show': this.state.show },
-      { 'border': this.state.border },
+      { show: this.state.show },
+      { border: this.state.border },
       { 'place-top': this.state.place === 'top' },
       { 'place-bottom': this.state.place === 'bottom' },
       { 'place-left': this.state.place === 'left' },
@@ -572,15 +572,22 @@ export default class ReactTooltip extends Component {
       { 'type-warning': this.state.type === 'warning' },
       { 'type-error': this.state.type === 'error' },
       { 'type-info': this.state.type === 'info' },
-      { 'type-light': this.state.type === 'light '}
+      { 'type-light': this.state.type === 'light' }
     );
 
-    if (html) {
+    if (!this.state.show) {
+      return null;
+    } else if (html) {
       return (
-        <div id={this.props.id} className={tooltipClass + ' ' + extraClass} data-id='tooltip' dangerouslySetInnerHTML={{__html: placeholder}}></div>
-      )
+        <div
+          id={this.props.id}
+          className={tooltipClass + ' ' + extraClass}
+          data-id='tooltip'
+          dangerouslySetInnerHTML={{ __html: placeholder }}
+        />
+      );
     } else {
-      const content = this.props.children ? this.props.children : placeholder
+      const content = this.props.children ? this.props.children : placeholder;
       return (
         <div
           children={content}
@@ -590,32 +597,37 @@ export default class ReactTooltip extends Component {
           onMouseLeave={() => this.setPopover(false)}
           onMouseOver={() => this.setPopover(true)}
         />
-      )
+    );
     }
   }
 
   trim (string) {
     if (Object.prototype.toString.call(string) !== '[object String]') {
-      return string
+      return string;
     }
-    let newString = string.split('')
-    let firstCount = 0
-    let lastCount = 0
+
+    let newString = string.split('');
+    let firstCount = 0;
+    let lastCount = 0;
     for (let i = 0; i < string.length; i++) {
       if (string[i] !== ' ') {
-        break
+        break;
       }
-      firstCount++
+
+      firstCount++;
     }
+
     for (let i = string.length - 1; i >= 0; i--) {
       if (string[i] !== ' ') {
-        break
+        break;
       }
-      lastCount++
+
+      lastCount++;
     }
-    newString.splice(0, firstCount)
-    newString.splice(-lastCount, lastCount)
-    return newString.join('')
+
+    newString.splice(0, firstCount);
+    newString.splice(-lastCount, lastCount);
+    return newString.join('');
   }
 
 }
